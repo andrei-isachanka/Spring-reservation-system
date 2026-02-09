@@ -22,6 +22,33 @@ public class ReservationService {
         idCounter = new AtomicLong();
     }
 
+    public void deleteReservation(Long id) {
+        if (!reservationMap.containsKey(id)){
+            throw new NoSuchElementException("There is no reservation with id: " + id);
+        }
+        reservationMap.remove(id);
+    }
+
+    public Reservation updateReservation(Long id, Reservation reservationToUpdate) {
+        if (!reservationMap.containsKey(id)){
+            throw new NoSuchElementException("There is no reservation with id: " + id);
+        }
+        var reservation = reservationMap.get(id);
+        if (reservation.status() != ReservationStatus.PENDING){
+            throw new IllegalStateException("Cannot modify with status " + reservation.status());
+        }
+        var updatedReservation = new Reservation(
+                reservation.id(),
+                reservationToUpdate.userId(),
+                reservationToUpdate.roomId(),
+                reservationToUpdate.startDate(),
+                reservationToUpdate.endDate(),
+                ReservationStatus.PENDING
+        );
+        reservationMap.put(reservation.id(), updatedReservation);
+        return updatedReservation;
+    }
+
     public Reservation getReservationById(Long id){
         if (!reservationMap.containsKey(id)){
             throw new NoSuchElementException("There is no reservation with id: " + id);
