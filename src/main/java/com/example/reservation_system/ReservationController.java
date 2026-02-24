@@ -29,14 +29,12 @@ public class ReservationController {
             ){
         log.info("Called getReservationById with ID = " + id);
         return ResponseEntity.status(HttpStatus.OK).body(reservationService.getReservationById(id));
-        //return reservationService.getReservationById(id);
     }
 
     @GetMapping
     public ResponseEntity<List<Reservation>> getAllReservations(){
         log.info("Called getAllReservations");
         return ResponseEntity.ok(reservationService.findAllReservation());
-        //return reservationService.findAllReservation();
     }
 
 
@@ -45,7 +43,6 @@ public class ReservationController {
         log.info("Called createReservation");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(reservationService.createReservation(reservationToCreate));
-        //return reservationService.createReservation(reservationToCreate);
     }
 
     @PutMapping("/{id}")
@@ -63,12 +60,7 @@ public class ReservationController {
             @PathVariable("id") Long id
     ){
         log.info("Called deleteReservation id={}", id);
-        try{
-            reservationService.cancelReservation(id);
-            return ResponseEntity.ok().build();
-        }catch (NoSuchElementException e){
-            return ResponseEntity.status(404).build();
-        }
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{id}/approve")
