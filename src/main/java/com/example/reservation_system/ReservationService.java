@@ -25,9 +25,18 @@ public class ReservationService {
 
     @Transactional
     public void cancelReservation(Long id) {
-        if (!repository.existsById(id)){
-            throw new NoSuchElementException("There is no reservation with id: " + id);
+
+        var reservation = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("There is no reservation with id: " + id));
+
+        if(reservation.getStatus().equals(ReservationStatus.APPROVED)){
+            throw new IllegalStateException("Cannot cancel approved reservation");
         }
+
+        if(reservation.getStatus().equals(ReservationStatus.CANCELLED)){
+            throw new IllegalStateException("Reservation is already canceled");
+        }
+
         repository.setStatus(id, ReservationStatus.CANCELLED);
         log.info("Successfully cancelled reservation: id={}", id);
     }
@@ -35,6 +44,10 @@ public class ReservationService {
 
 
     public Reservation updateReservation(Long id, Reservation reservationToUpdate) {
+
+        if(!reservationToUpdate.endDate().isAfter(reservationToUpdate.startDate())){
+            throw new IllegalArgumentException("Start date must be earlier than end date");
+        }
 
         var reservationEntity = repository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("There is no reservation with id: " + id));
@@ -76,12 +89,14 @@ public class ReservationService {
 
 
     public Reservation createReservation(Reservation reservationToCreate) {
-        if (reservationToCreate.id() != null){
-            throw new IllegalArgumentException("ID should be empty");
-        }
         if (reservationToCreate.status() != null){
             throw new IllegalArgumentException("Status should be empty");
         }
+
+        if(!reservationToCreate.endDate().isAfter(reservationToCreate.startDate())){
+            throw new IllegalArgumentException("Start date must be earlier than end date");
+        }
+
         var entityToSave = new ReservationEntity(
                 null,
                 reservationToCreate.userId(),

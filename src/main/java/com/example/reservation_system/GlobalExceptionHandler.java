@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -31,7 +32,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDTO);
     }
 
-    @ExceptionHandler(exception = {IllegalArgumentException.class, IllegalStateException.class})
+    @ExceptionHandler(exception = {IllegalArgumentException.class,
+            IllegalStateException.class,
+            MethodArgumentNotValidException.class})
     public ResponseEntity<ErrorResponseDTO> handleBadRequest(Exception e){
         log.error("Handle badRequestException", e);
         var errorDTO = new ErrorResponseDTO("Bad request", e.getMessage(), LocalDateTime.now());
