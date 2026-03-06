@@ -60,10 +60,12 @@ public class ReservationController {
     @DeleteMapping("/{id}/cancel")
     public ResponseEntity<Void> deleteReservation(
             @PathVariable("id") Long id
-    ){
+    ) {
         log.info("Called deleteReservation id={}", id);
-        return ResponseEntity.ok().build();
+        reservationService.cancelReservation(id);
+        return ResponseEntity.noContent().build();
     }
+
 
     @PostMapping("/{id}/approve")
     public ResponseEntity<Reservation> approveReservation(
