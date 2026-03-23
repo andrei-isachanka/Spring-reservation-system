@@ -16,9 +16,12 @@ public class ReservationService {
     private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
 
     private final ReservationRepository repository;
+    private final ReservationNotificationProducer notificationProducer;
 
-    public ReservationService(ReservationRepository repository) {
+    public ReservationService(ReservationRepository repository,
+                              ReservationNotificationProducer notificationProducer) {
         this.repository = repository;
+        this.notificationProducer = notificationProducer;
     }
 
 
@@ -38,6 +41,7 @@ public class ReservationService {
         }
 
         repository.setStatus(id, ReservationStatus.CANCELLED);
+        notificationProducer.sendStatusChangeNotification(id, ReservationStatus.CANCELLED);
         log.info("Successfully cancelled reservation: id={}", id);
     }
 
@@ -127,6 +131,7 @@ public class ReservationService {
 
         reservationEntity.setStatus(ReservationStatus.APPROVED);
         repository.save(reservationEntity);
+        notificationProducer.sendStatusChangeNotification(id, ReservationStatus.APPROVED);
 
         return toDomainReservation(reservationEntity);
     }
