@@ -46,7 +46,7 @@ public class ReservationService {
     }
 
 
-
+    @Transactional
     public Reservation updateReservation(Long id, Reservation reservationToUpdate) {
 
         if(!reservationToUpdate.endDate().isAfter(reservationToUpdate.startDate())){
@@ -91,7 +91,7 @@ public class ReservationService {
     }
 
 
-
+    @Transactional
     public Reservation createReservation(Reservation reservationToCreate) {
         if (reservationToCreate.status() != null){
             throw new IllegalArgumentException("Status should be empty");
@@ -114,7 +114,7 @@ public class ReservationService {
     }
 
 
-
+    @Transactional
     public Reservation approveReservation(Long id) {
 
         var reservationEntity = repository.findById(id).orElseThrow(
@@ -140,19 +140,10 @@ public class ReservationService {
 
     private boolean isReservationConflict(ReservationEntity reservation){
 
-        var allReservations = repository.findAll();
-
-        for (ReservationEntity existingReservation : allReservations){
-            if (reservation.getId().equals(existingReservation.getId())) continue;
-            if (!reservation.getRoomId().equals(existingReservation.getRoomId())) continue;
-            if (!existingReservation.getStatus().equals(ReservationStatus.APPROVED)) continue;
-
-            if (reservation.getStartDate().isBefore(existingReservation.getEndDate()) && existingReservation.getStartDate().isBefore(reservation.getEndDate())) {
-                return true;
-            }
-        }
-
-        return false;
+        return repository.existsConflictingReservation(reservation.getRoomId(),
+                reservation.getStartDate(),
+                reservation.getEndDate(),
+                reservation.getId());
     }
 
 
