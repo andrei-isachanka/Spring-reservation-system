@@ -3,6 +3,7 @@ package com.example.reservation_system;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -39,5 +40,12 @@ public class GlobalExceptionHandler {
         log.error("Handle badRequestException", e);
         var errorDTO = new ErrorResponseDTO("Bad request", e.getMessage(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDTO);
+    }
+
+    @ExceptionHandler(PessimisticLockingFailureException.class)
+    public ResponseEntity<?> handleLockException(PessimisticLockingFailureException e) {
+        log.error("Lock conflict", e);
+        var errorDTO = new ErrorResponseDTO("Conflict", "resource is being modified", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorDTO);
     }
 }

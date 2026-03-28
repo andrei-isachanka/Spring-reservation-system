@@ -23,6 +23,10 @@ public class ReservationEntity {
     @Column(name = "status", nullable = false)
     private ReservationStatus status;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version = 0L;
+
     public ReservationEntity() {
     }
 
@@ -34,6 +38,10 @@ public class ReservationEntity {
         this.endDate = endDate;
         this.status = status;
     }
+
+    public void setVersion(Long version) {this.version = version;}
+
+    public Long getVersion() {return version;}
 
     public void setId(Long id) {
         this.id = id;

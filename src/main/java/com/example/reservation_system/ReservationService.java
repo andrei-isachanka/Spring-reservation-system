@@ -59,16 +59,13 @@ public class ReservationService {
         if (reservationEntity.getStatus() != ReservationStatus.PENDING){
             throw new IllegalStateException("Cannot modify with status " + reservationEntity.getStatus());
         }
-        var reservationToSave = new ReservationEntity(
-                reservationEntity.getId(),
-                reservationToUpdate.userId(),
-                reservationToUpdate.roomId(),
-                reservationToUpdate.startDate(),
-                reservationToUpdate.endDate(),
-                ReservationStatus.PENDING
-        );
 
-        var updatedReservation = repository.save(reservationToSave);
+        reservationEntity.setUserId(reservationToUpdate.userId());
+        reservationEntity.setRoomId(reservationToUpdate.roomId());
+        reservationEntity.setStartDate(reservationToUpdate.startDate());
+        reservationEntity.setEndDate(reservationToUpdate.endDate());
+        var updatedReservation = repository.save(reservationEntity);
+
 
         return toDomainReservation(updatedReservation);
     }
@@ -123,6 +120,13 @@ public class ReservationService {
         if (reservationEntity.getStatus() != ReservationStatus.PENDING){
             throw new IllegalStateException("Cannot approve with status " + reservationEntity.getStatus());
         }
+
+        repository.findAndLockConflict(
+                reservationEntity.getRoomId(),
+                reservationEntity.getStartDate(),
+                reservationEntity.getEndDate(),
+                reservationEntity.getId()
+        );
 
         var isConflict = isReservationConflict(reservationEntity);
         if (isConflict){
